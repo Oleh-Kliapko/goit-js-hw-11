@@ -7,62 +7,112 @@ body {
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #fafafa;
+  background-color: transparent;
   background-repeat: repeat;
-  color: #212121;
-  line-height: 1.5;
+  margin: 0;
 }
 
-#search-box {
+#search-form {
   font: inherit;
-  padding: 8px;
-  width: 320px;
-  margin-bottom: 20px;
-  margin-top: 20px;
-  margin-left: 20px;
-}
-
-ul {
-  padding: 0;
-  list-style: none;
-}
-
-li {
-  margin-bottom: 20px;
-  margin-left: 20px;
+  padding: 10px;
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 15px;
+  background-color: #586cad;
+  position: fixed;
+  width: 100%;
+}
+
+input {
+  font-size: 20px;
+  border-radius: 0px;
+  padding: 8px;
+  border-color: transparent;
+}
+
+.search-form button {
+  font-size: 20px;
+  padding: 8px;
+  padding-right: 10px;
+  padding-left: 10px;
+  border-color: transparent;
+  border: 0px;
+  background-color: rgb(240, 240, 240);
+  cursor: pointer;
+}
+
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  padding-top: 90px;
+  padding-bottom: 40px;
+}
+
+.wrapper-loadmore {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 40px;
+}
+
+.load-more {
+  font-size: 20px;
+  color: aliceblue;
+  padding: 8px;
+  padding-right: 10px;
+  padding-left: 10px;
+  border-color: transparent;
+  border: 0px;
+  background-color: #586cad;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: rgb(155, 192, 225);
+  transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.photo-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-left: 30px;
+  margin-bottom: 30px;
+  width: calc((100% / 4) - 40px);
 }
 
 img {
   display: block;
-  width: 80px;
+  width: 100%;
   height: auto;
-  border: 0.5px solid grey;
 }
 
-h1 {
-  font-size: 28px;
-  color: #212121;
-  margin: 0;
-  padding: 0;
+.info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.info-item {
+  text-align: center;
+  font-size: 14px;
 }
 
 p {
-  margin-top: 10px;
-  margin-bottom: 0px;
-  margin-left: 20px;
-  font-size: 30px;
+  display: flex;
+  flex-direction: column;
 }
 
-.big img {
-  display: block;
-  width: 150px;
-  height: auto;
-  border: 0.5px solid grey;
-}
-
-.big h1 {
-  font-size: 48px;
+.visually-hidden {
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  border: 0;
+  padding: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  margin: -1px;
 }
