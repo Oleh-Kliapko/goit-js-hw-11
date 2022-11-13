@@ -45,7 +45,8 @@ function onSubmit(evt) {
 }
 
 function onLoadFirstPhotos(response) {
-  if (response.data.total === 0) {
+  const totalHits = response.data.totalHits;
+  if (totalHits === 0) {
     Notify.failure(
       'Sorry, there are no images matching your search query. Please try again',
       OPTIONS_NOTIFICATION
@@ -53,12 +54,13 @@ function onLoadFirstPhotos(response) {
     return;
   }
 
+  Notify.success(`Hooray! We found ${totalHits} images`, OPTIONS_NOTIFICATION);
+
   const photos = response.data.hits;
   onMarkupPhotos(photos);
 
-  if (response.data.totalHits <= pixabayAPIService.perPage) {
+  if (totalHits <= pixabayAPIService.perPage) {
     reachedEndSearch();
-
     return;
   }
   refs.loadMoreBtn.classList.remove('visually-hidden');
