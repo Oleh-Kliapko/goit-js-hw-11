@@ -1,6 +1,8 @@
 import './css/styles.css';
 import PixabayAPIService from './js/fetch-photo';
 import { Notify } from 'notiflix';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 import infiniteScroll from 'infinite-scroll';
 
 const pixabayAPIService = new PixabayAPIService();
@@ -13,7 +15,9 @@ const refs = {
   formEl: document.querySelector('#search-form'),
   loadMoreBtn: document.querySelector('.load-more'),
   galleryContainer: document.querySelector('.gallery'),
+  photoEl: document.querySelector('a'),
 };
+let timerID;
 
 refs.formEl.addEventListener('submit', onSubmit);
 refs.loadMoreBtn.addEventListener('click', onLoadMorePhotos);
@@ -45,7 +49,9 @@ function onSubmit(evt) {
 }
 
 function onLoadFirstPhotos(response) {
+  clearTimeout(timerID);
   const totalHits = response.data.totalHits;
+
   if (totalHits === 0) {
     Notify.failure(
       'Sorry, there are no images matching your search query. Please try again',
@@ -58,9 +64,12 @@ function onLoadFirstPhotos(response) {
 
   const photos = response.data.hits;
   onMarkupPhotos(photos);
+  onSimpleLightBox();
 
   if (totalHits <= pixabayAPIService.perPage) {
-    reachedEndSearch();
+    timerID = setTimeout(() => {
+      reachedEndSearch();
+    }, 4100);
     return;
   }
   refs.loadMoreBtn.classList.remove('visually-hidden');
@@ -74,6 +83,7 @@ function onLoadMorePhotos() {
     .then(response => {
       const photos = response.data.hits;
       onMarkupPhotos(photos);
+      onSimpleLightBox();
 
       let restOfPhotos =
         response.data.totalHits -
@@ -84,19 +94,6 @@ function onLoadMorePhotos() {
       }
     })
     .catch(onError);
-}
-
-function onError(error) {
-  if (error.response) {
-    Notify.failure(
-      `Sorry, an error occurred - ${error.response.status}. Try again`,
-      OPTIONS_NOTIFICATION
-    );
-  }
-  Notify.failure(
-    'Sorry, a request was made, but no response was received. Try again',
-    OPTIONS_NOTIFICATION
-  );
 }
 
 function onMarkupPhotos(photos) {
@@ -112,8 +109,10 @@ function onMarkupPhotos(photos) {
         downloads,
       }) => {
         return `<div class="photo-card">
-            <img src="${webformatURL}" alt="${tags}" loading="lazy" />
-             <div class="info">
+              <a href="${largeImageURL}"> 
+                <img src="${webformatURL}" alt="${tags}" loading="lazy" />
+              </a>
+              <div class="info">
                 <p class="info-item">
                   <b>Likes: </b>${likes}
                 </p>
@@ -135,6 +134,26 @@ function onMarkupPhotos(photos) {
   refs.galleryContainer.insertAdjacentHTML('beforeend', markupPhotos);
 }
 
+function onError(error) {
+  if (error.response) {
+    Notify.failure(
+      `Sorry, an error occurred - ${error.response.status}. Try again`,
+      OPTIONS_NOTIFICATION
+    );
+  } else if (error.request) {
+    Notify.failure(
+      'Sorry, the request was made, but no response was received. Try again',
+      OPTIONS_NOTIFICATION
+    );
+  } else {
+    Notify.failure(
+      'Something happened in setting up the request that triggered an Error. Try again',
+      OPTIONS_NOTIFICATION
+    );
+  }
+  Notify.failure(`${error.config}. Try again`, OPTIONS_NOTIFICATION);
+}
+
 function reachedEndSearch() {
   Notify.warning(
     `We're sorry, but you've reached the end of search ${pixabayAPIService.getCurrentQuery.toUpperCase()}. Please start a new search`,
@@ -146,4 +165,11 @@ function reachedEndSearch() {
     }
   );
   refs.loadMoreBtn.classList.add('visually-hidden');
+}
+
+function onSimpleLightBox() {
+  new SimpleLightbox('.gallery a', {
+    captionsData: 'alt',
+    captionDelay: 250,
+  });
 }
