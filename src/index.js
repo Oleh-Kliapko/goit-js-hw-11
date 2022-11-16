@@ -34,9 +34,6 @@ const optionsScroll = {
   rootMargin: '200px',
 };
 
-const observer = new IntersectionObserver(onLoadMore, optionsScroll);
-observer.observe(refs.pointOfInfiniteScroll);
-
 const onLoadMore = entries => {
   entries.forEach(async entry => {
     if (
@@ -56,6 +53,9 @@ const onLoadMore = entries => {
     }
   });
 };
+
+const observer = new IntersectionObserver(onLoadMore, optionsScroll);
+observer.observe(refs.pointOfInfiniteScroll);
 
 /** functions */
 
@@ -81,13 +81,10 @@ async function onSubmit(evt) {
 
   pixabayAPIService.setNewQuery = searchQuery;
   pixabayAPIService.resetPage();
-  await pixabayAPIService
-    .onFetchPhotos()
-    .then(onLoadFirstPhotos)
-    .catch(onError);
+  await pixabayAPIService.onFetchPhotos().then(onLoadPhotos).catch(onError);
 }
 
-function onLoadFirstPhotos(response) {
+function onLoadPhotos(response) {
   const totalHits = response.data.totalHits;
 
   if (totalHits === 0 && timerNotifyErrorFetch === 1) {
@@ -179,7 +176,7 @@ function onSimpleLightBox() {
 
 function reachedEndSearch() {
   Notify.warning(
-    `We're sorry, but you've reached the end of search ${pixabayAPIService.getCurrentQuery.toUpperCase()}. Please start a new search`,
+    `We're sorry, but you've reached the end of search "${pixabayAPIService.getCurrentQuery.toUpperCase()}". Please start a new search`,
     {
       timeout: 5000,
       position: 'center-center',
