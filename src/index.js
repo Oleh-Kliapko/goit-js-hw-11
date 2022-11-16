@@ -42,7 +42,11 @@ const onLoadMore = entries => {
       pixabayAPIService.lengthArrayPhotos >= pixabayAPIService.perPage
     ) {
       pixabayAPIService.incrementPages();
-      await pixabayAPIService.onFetchPhotos().then(onLoadPhotos).catch(onError);
+      try {
+        await pixabayAPIService.onFetchPhotos().then(onLoadPhotos);
+      } catch (error) {
+        reachedEndSearch();
+      }
     } else if (
       pixabayAPIService.lengthArrayPhotos < pixabayAPIService.perPage &&
       timerNotifyEndPhotos === 1
@@ -164,7 +168,6 @@ function onError(error) {
       OPTIONS_NOTIFICATION
     );
   }
-  Notify.failure(`${error.config}. Try again`, OPTIONS_NOTIFICATION);
 }
 
 function onSimpleLightBox() {
