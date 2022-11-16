@@ -21,6 +21,7 @@ body {
   background-color: #586cad;
   position: fixed;
   width: 100%;
+  z-index: 100;
 }
 
 input {
@@ -82,9 +83,14 @@ button:hover {
 }
 
 img {
-  display: block;
+  /* display: block; */
   width: 100%;
   height: auto;
+  transition: transform 400ms ease-out;
+}
+
+img:hover {
+  transform: scale(1.15);
 }
 
 .info {

@@ -8,11 +8,14 @@ export default class PixabayAPIService {
     this.query = '';
     this.page = 1;
     this.perPage = 40;
+    this.lengthArrayPhotos;
   }
 
-  onFetchPhotos() {
+  async onFetchPhotos() {
     const url = `${this.baseUrl}&page=${this.page}&per_page=${this.perPage}&key=${this.key}&q=${this.query}`;
-    return axios.get(url);
+    const res = await axios.get(url);
+    this.lengthArrayPhotos = res.data.hits.length;
+    return res;
   }
 
   //   onFetchPhotos = async () => {

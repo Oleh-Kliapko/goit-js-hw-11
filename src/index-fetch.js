@@ -3,8 +3,7 @@ import PixabayAPIService from './js/fetch-photo';
 import { Notify } from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-import OnlyScroll from 'only-scrollbar';
-import InfiniteScroll from 'infinite-scroll';
+import infiniteScroll from 'infinite-scroll';
 
 const pixabayAPIService = new PixabayAPIService();
 
@@ -12,63 +11,28 @@ const OPTIONS_NOTIFICATION = {
   timeout: 4000,
   fontSize: '16px',
 };
-
-let timerNotifyEndPhotos = 1;
-let timerNotifyErrorFetch = 1;
-let timerNotifyCountPhotos = 1;
-
 const refs = {
   formEl: document.querySelector('#search-form'),
+  loadMoreBtn: document.querySelector('.load-more'),
   galleryContainer: document.querySelector('.gallery'),
-  pointOfInfiniteScroll: document.querySelector('.point-infinite-scroll'),
+  photoEl: document.querySelector('a'),
 };
+let timerID;
 
 refs.formEl.addEventListener('submit', onSubmit);
-
-new OnlyScroll(document.scrollingElement, {
-  damping: 0.6,
-});
-
-/** infinite scroll */
-const optionsScroll = {
-  rootMargin: '200px',
-};
-
-const observer = new IntersectionObserver(onLoadMore, optionsScroll);
-observer.observe(refs.pointOfInfiniteScroll);
-
-const onLoadMore = entries => {
-  entries.forEach(async entry => {
-    if (
-      entry.isIntersecting &&
-      pixabayAPIService.query !== '' &&
-      pixabayAPIService.lengthArrayPhotos >= pixabayAPIService.perPage
-    ) {
-      pixabayAPIService.incrementPages();
-      await pixabayAPIService.onFetchPhotos().then(onLoadPhotos).catch(onError);
-    } else if (
-      pixabayAPIService.lengthArrayPhotos < pixabayAPIService.perPage &&
-      timerNotifyEndPhotos === 1
-    ) {
-      reachedEndSearch();
-      timerNotifyEndPhotos = 2;
-      return;
-    }
-  });
-};
+refs.loadMoreBtn.addEventListener('click', onLoadMorePhotos);
+refs.loadMoreBtn.classList.add('visually-hidden');
 
 /** functions */
 
-async function onSubmit(evt) {
+function onSubmit(evt) {
   evt.preventDefault();
-  pixabayAPIService.query = '';
-  timerNotifyErrorFetch = 1;
-  timerNotifyCountPhotos = 1;
   refs.galleryContainer.innerHTML = '';
+  refs.loadMoreBtn.classList.add('visually-hidden');
 
   const formData = new FormData(evt.target);
   const searchQuery = formData.get('searchQuery').trim();
-
+  // const searchQuery = evt.currentTarget.elements.searchQuery.value.trim();
   refs.formEl.reset();
 
   if (!searchQuery || searchQuery.length < 3) {
@@ -81,35 +45,55 @@ async function onSubmit(evt) {
 
   pixabayAPIService.setNewQuery = searchQuery;
   pixabayAPIService.resetPage();
-  await pixabayAPIService
-    .onFetchPhotos()
-    .then(onLoadFirstPhotos)
-    .catch(onError);
+  pixabayAPIService.onFetchPhotos().then(onLoadFirstPhotos).catch(onError);
 }
 
 function onLoadFirstPhotos(response) {
+  clearTimeout(timerID);
   const totalHits = response.data.totalHits;
 
-  if (totalHits === 0 && timerNotifyErrorFetch === 1) {
+  if (totalHits === 0) {
     Notify.failure(
       'Sorry, there are no images matching your search query. Please try again',
       OPTIONS_NOTIFICATION
     );
-    timerNotifyErrorFetch = 2;
     return;
   }
 
-  if (totalHits !== 0 && timerNotifyCountPhotos === 1) {
-    Notify.success(
-      `Hooray! We found ${totalHits} images`,
-      OPTIONS_NOTIFICATION
-    );
-    timerNotifyCountPhotos = 2;
-  }
+  Notify.success(`Hooray! We found ${totalHits} images`, OPTIONS_NOTIFICATION);
 
   const photos = response.data.hits;
   onMarkupPhotos(photos);
   onSimpleLightBox();
+
+  if (totalHits <= pixabayAPIService.perPage) {
+    timerID = setTimeout(() => {
+      reachedEndSearch();
+    }, 4100);
+    return;
+  }
+  refs.loadMoreBtn.classList.remove('visually-hidden');
+}
+
+function onLoadMorePhotos() {
+  pixabayAPIService.incrementPages();
+
+  pixabayAPIService
+    .onFetchPhotos()
+    .then(response => {
+      const photos = response.data.hits;
+      onMarkupPhotos(photos);
+      onSimpleLightBox();
+
+      let restOfPhotos =
+        response.data.totalHits -
+        pixabayAPIService.page * pixabayAPIService.perPage;
+      if (restOfPhotos <= 0) {
+        reachedEndSearch();
+        return;
+      }
+    })
+    .catch(onError);
 }
 
 function onMarkupPhotos(photos) {
@@ -170,13 +154,6 @@ function onError(error) {
   Notify.failure(`${error.config}. Try again`, OPTIONS_NOTIFICATION);
 }
 
-function onSimpleLightBox() {
-  new SimpleLightbox('.gallery a', {
-    captionsData: 'alt',
-    captionDelay: 250,
-  });
-}
-
 function reachedEndSearch() {
   Notify.warning(
     `We're sorry, but you've reached the end of search ${pixabayAPIService.getCurrentQuery.toUpperCase()}. Please start a new search`,
@@ -187,4 +164,12 @@ function reachedEndSearch() {
       width: '320px',
     }
   );
+  refs.loadMoreBtn.classList.add('visually-hidden');
+}
+
+function onSimpleLightBox() {
+  new SimpleLightbox('.gallery a', {
+    captionsData: 'alt',
+    captionDelay: 250,
+  });
 }
