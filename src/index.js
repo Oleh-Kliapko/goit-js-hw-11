@@ -25,11 +25,14 @@ const refs = {
 
 refs.formEl.addEventListener('submit', onSubmit);
 
+/** lazy scrolling */
+
 new OnlyScroll(document.scrollingElement, {
   damping: 0.6,
 });
 
 /** infinite scroll */
+
 const optionsScroll = {
   rootMargin: '200px',
 };
@@ -61,7 +64,7 @@ const onLoadMore = entries => {
 const observer = new IntersectionObserver(onLoadMore, optionsScroll);
 observer.observe(refs.pointOfInfiniteScroll);
 
-/** functions */
+/** function after form submit */
 
 async function onSubmit(evt) {
   evt.preventDefault();
@@ -87,6 +90,8 @@ async function onSubmit(evt) {
   pixabayAPIService.resetPage();
   await pixabayAPIService.onFetchPhotos().then(onLoadPhotos).catch(onError);
 }
+
+/** function for starting of photo loading */
 
 function onLoadPhotos(response) {
   const totalHits = response.data.totalHits;
