@@ -47,6 +47,7 @@ const onLoadMore = entries => {
       pixabayAPIService.incrementPages();
       try {
         await pixabayAPIService.onFetchPhotos().then(onLoadPhotos);
+        timerNotifyEndPhotos = 1;
       } catch (error) {
         reachedEndSearch();
       }
