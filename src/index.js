@@ -3,8 +3,7 @@ import PixabayAPIService from './js/fetch-photo';
 import { Notify } from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-import OnlyScroll from 'only-scrollbar';
-import InfiniteScroll from 'infinite-scroll';
+import easyScroll from 'easy-scroll';
 
 const pixabayAPIService = new PixabayAPIService();
 
@@ -25,10 +24,17 @@ const refs = {
 
 refs.formEl.addEventListener('submit', onSubmit);
 
-/** lazy scrolling */
+const simpleLightBox = new SimpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionDelay: 250,
+  scrollZoom: false,
+});
 
-new OnlyScroll(document.scrollingElement, {
-  damping: 0.6,
+easyScroll({
+  scrollableDomEle: window,
+  duration: 2000,
+  easingPreset: 'easeInQuad',
+  scrollAmount: 1000,
 });
 
 /** infinite scroll */
@@ -116,7 +122,7 @@ function onLoadPhotos(response) {
 
   const photos = response.data.hits;
   onMarkupPhotos(photos);
-  onSimpleLightBox();
+  simpleLightBox.refresh();
 }
 
 function onMarkupPhotos(photos) {
@@ -174,13 +180,6 @@ function onError(error) {
       OPTIONS_NOTIFICATION
     );
   }
-}
-
-function onSimpleLightBox() {
-  new SimpleLightbox('.gallery a', {
-    captionsData: 'alt',
-    captionDelay: 250,
-  });
 }
 
 function reachedEndSearch() {

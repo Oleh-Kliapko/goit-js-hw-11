@@ -18,13 +18,6 @@ export default class PixabayAPIService {
     return res;
   }
 
-  //   onFetchPhotos = async () => {
-  //     const url = `${this.baseUrl}&page=${this.page}&key=${this.key}&q=${this.query}`;
-  //     const response = await fetch(url);
-  //     const photos = await response.json();
-  //     return photos;
-  //   };
-
   incrementPages() {
     this.page += 1;
   }
